@@ -2,11 +2,11 @@
 ## Overview
 
 ## 🚀 Key Features
-- **  **
-- **  ** 
-- **  **
-- **  **
-- **  **
+- ** Video Download Options **
+- ** MP3 Conversion ** 
+- ** User-Friendly Interface **
+- ** Video Cover Display **
+- ** Compatibility **
 
 ## 🤝 Connect with Me
 Let's chat about potential projects, job opportunities, or any other collaboration! Feel free to connect with me through the following channels:
