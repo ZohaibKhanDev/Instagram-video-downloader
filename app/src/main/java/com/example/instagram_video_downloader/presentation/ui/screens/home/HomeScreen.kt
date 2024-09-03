@@ -104,7 +104,9 @@ fun HomeScreen() {
         }
 
         ResultState.Loading -> {
-            isLoading = true
+            if (isLoading) {
+                isLoading = true
+            }
         }
 
         is ResultState.Success -> {
@@ -228,6 +230,7 @@ fun HomeScreen() {
                                 modifier = Modifier
                                     .width(73.dp)
                                     .clickable {
+                                        isLoading=true
                                         viewModel.downloadInstagramVideo(url, "MzRlODBiNWFlZA==")
                                     }
                                     .height(53.dp)
@@ -263,12 +266,10 @@ fun HomeScreen() {
                             AsyncImage(
                                 model = it.videoThumbnail,
                                 contentDescription = "",
-                                imageLoader = ImageLoader(context = context),
                                 modifier = Modifier
-                                    .clip(RoundedCornerShape(12.dp))
                                     .fillMaxWidth()
                                     .padding(start = 14.dp, end = 14.dp)
-                                    .height(220.dp),
+                                    .height(220.dp).clip(RoundedCornerShape(12.dp)),
                                 contentScale = ContentScale.Crop
                             )
                         }
@@ -382,11 +383,12 @@ fun HomeScreen() {
 
                 Button(
                     onClick = {
+                        showBottomSheet = false
                         downloaderData?.let {
                             val downloadUrl = it.downloadUrl
                             val fileName = it.videoTitle
                             val mimeType =
-                                if (selectedQuality == "128k") "audio/mpeg" else "video/mp4"
+                                if (selectedQuality == "128k") "audio/mp3" else "video/mp4"
 
                             if (!downloadUrl.isNullOrEmpty()) {
                                 downloadFile(context, downloadUrl, fileName, mimeType)
