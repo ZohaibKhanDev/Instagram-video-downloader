@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -25,9 +26,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Downloading
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -283,17 +287,44 @@ fun HomeScreen() {
 
         if (showBottomSheet) {
             ModalBottomSheet(
-                onDismissRequest = {  },
+                onDismissRequest = { },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(550.dp)
             ) {
+                Text(
+                    text = "Music",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 35.dp, start = 17.dp)
+                )
+                Row(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(start = 17.dp, top = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(3.dp)
+                ) {
+                    VideoQualityOption(
+                        quality = "128k",
+                        isSelected = selectedQuality == "128k",
+                        onSelect = { selectedQuality = "128k" }
+                    )
+                }
+
+                Text(
+                    text = "Video",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(top = 35.dp, start = 17.dp)
+                )
+
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(3),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(13.dp),
+                        .padding(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(9.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     item {
@@ -339,6 +370,29 @@ fun HomeScreen() {
                         )
                     }
                 }
+
+
+                Button(
+                    onClick = { /*TODO*/ },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                        .height(54.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0XFFfe0164),
+                        contentColor = Color.White
+                    ), shape = RoundedCornerShape(6.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Downloading,
+                            contentDescription = "",
+                            tint = Color.White
+                        )
+
+                        Text(text = "Download", color = Color.White, fontSize = 19.sp)
+                    }
+                }
             }
         }
     }
@@ -361,8 +415,8 @@ fun VideoQualityOption(quality: String, isSelected: Boolean, onSelect: () -> Uni
         )
         Text(
             text = quality,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }
