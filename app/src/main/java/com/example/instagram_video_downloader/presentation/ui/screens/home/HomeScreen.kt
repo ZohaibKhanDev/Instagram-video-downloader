@@ -18,6 +18,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -26,18 +28,25 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Download
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,6 +66,7 @@ import com.example.instagram_video_downloader.R
 import com.example.instagram_video_downloader.domain.model.InstagramDownloader
 import com.example.instagram_video_downloader.domain.usecase.ResultState
 import com.example.instagram_video_downloader.presentation.viewmodel.MainViewModel
+import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,18 +74,15 @@ import org.koin.compose.koinInject
 @Composable
 fun HomeScreen() {
     val viewModel: MainViewModel = koinInject()
-    var downloaderData by remember {
-        mutableStateOf<InstagramDownloader?>(null)
-    }
-
-    var isLoading by remember {
-        mutableStateOf(false)
-    }
-    var url by remember {
-        mutableStateOf("")
-    }
+    var downloaderData by remember { mutableStateOf<InstagramDownloader?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    var showBottomSheet by remember { mutableStateOf(false) }
+    var radioButton1 by remember { mutableStateOf(false) }
+    var url by remember { mutableStateOf("") }
     val state by viewModel.videoDownloadInfo.collectAsState()
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
     when (state) {
         is ResultState.Error -> {
             isLoading = false
@@ -109,9 +116,7 @@ fun HomeScreen() {
                 painter = painterResource(id = R.drawable.download),
                 contentDescription = "",
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(
-                    47.dp
-                ),
+                modifier = Modifier.size(47.dp),
                 colorFilter = ColorFilter.tint(color = Color(0XFFfe0164))
             )
         }, actions = {
@@ -123,17 +128,19 @@ fun HomeScreen() {
                     .border(
                         BorderStroke(1.dp, color = Color.LightGray),
                         shape = RoundedCornerShape(1.dp)
-                    ), contentAlignment = Alignment.Center
+                    ),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(imageVector = Icons.Default.Menu, contentDescription = "")
             }
         })
     }, floatingActionButton = {
         if (downloaderData?.videoThumbnail == null) {
-
         } else {
             FloatingActionButton(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    showBottomSheet = true
+                },
                 containerColor = Color(0XFFfe0164),
                 contentColor = Color.White
             ) {
@@ -145,7 +152,6 @@ fun HomeScreen() {
             }
         }
     }) {
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -162,7 +168,8 @@ fun HomeScreen() {
                         .border(
                             BorderStroke(1.dp, color = Color.LightGray),
                             shape = RoundedCornerShape(5.dp)
-                        ), contentAlignment = Alignment.Center
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
@@ -176,45 +183,41 @@ fun HomeScreen() {
                             fontWeight = FontWeight.SemiBold,
                             color = Color.Gray
                         )
-
                         Spacer(modifier = Modifier.height(15.dp))
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(
-                                    start = 20.dp, end = 20.dp
-                                ),
+                                .padding(start = 20.dp, end = 20.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             OutlinedTextField(
                                 value = url,
-                                onValueChange = {
-                                    url = it
-                                },
+                                onValueChange = { url = it },
                                 modifier = Modifier.width(280.dp),
                                 placeholder = {
                                     Text(text = "Paste Instagram link", color = Color.LightGray)
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = Icons.Default.Search, contentDescription = ""
+                                        imageVector = Icons.Default.Search,
+                                        contentDescription = ""
                                     )
                                 },
-                                textStyle = TextStyle(
-                                    fontSize = 15.sp, color = Color.LightGray
-                                ), singleLine = true
+                                textStyle = TextStyle(fontSize = 15.sp, color = Color.LightGray),
+                                colors = TextFieldDefaults.colors(
+                                    focusedTextColor = Color.Black,
+                                    unfocusedTextColor = Color.Black,
+                                    focusedContainerColor = Color.White,
+                                    unfocusedContainerColor = Color.White
+                                ),
+                                singleLine = true
                             )
-
                             Spacer(modifier = Modifier.width(7.dp))
-
                             Box(
                                 modifier = Modifier
                                     .width(73.dp)
                                     .clickable {
-                                        viewModel.downloadInstagramVideo(
-                                            url,
-                                            "MzRlODBiNWFlZA=="
-                                        )
+                                        viewModel.downloadInstagramVideo(url, "MzRlODBiNWFlZA==")
                                     }
                                     .height(53.dp)
                                     .background(Color(0XFFfe0164)),
@@ -226,25 +229,24 @@ fun HomeScreen() {
                                     Icon(
                                         imageVector = Icons.Default.ArrowBack,
                                         contentDescription = "",
-                                        modifier = Modifier.rotate(180f), tint = Color.White
+                                        modifier = Modifier.rotate(180f),
+                                        tint = Color.White
                                     )
                                 }
                             }
                         }
-
                         Spacer(modifier = Modifier.height(10.dp))
-
                         Text(
-                            text = "By using our service you are accepting our terms" +
-                                    "of service",
+                            text = "By using our service you are accepting our terms of service",
                             color = Color.Gray,
                             fontSize = 14.sp,
                             modifier = Modifier.padding(start = 10.dp, end = 10.dp)
                         )
+                        Spacer(modifier = Modifier.height(10.dp))
 
-
-
-                        Spacer(modifier = Modifier.height(20.dp))
+                        if (isLoading) {
+                            CircularProgressIndicator(color = Color(0XFFfe0164))
+                        }
 
                         downloaderData?.let {
                             AsyncImage(
@@ -258,22 +260,16 @@ fun HomeScreen() {
                                 contentScale = ContentScale.Crop
                             )
                         }
-
                     }
                 }
-
-
-
                 Spacer(modifier = Modifier.height(20.dp))
-
                 Text(
                     text = "Best Instagram Video Downloader",
                     fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold, color = Color.Gray
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Gray
                 )
-
                 Spacer(modifier = Modifier.height(20.dp))
-
                 Text(
                     text = "Y2Mate is the fastest Instagram Downloader tool that allows you to easily convert and download videos and audios from youtube for free and in the best available quality. Y2Mate is the ultimate tool to download unlimited Instagram videos without any need for registration. You can quickly convert and download hundreds of videos and music files directly from Instagram.",
                     color = Color.DarkGray,
@@ -282,9 +278,91 @@ fun HomeScreen() {
                     modifier = Modifier.padding(start = 10.dp, end = 10.dp)
                 )
             }
-
         }
+        var selectedQuality by remember { mutableStateOf("144p") }
 
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {  },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            ) {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(13.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    item {
+                        VideoQualityOption(
+                            quality = "144p",
+                            isSelected = selectedQuality == "144p",
+                            onSelect = { selectedQuality = "144p" }
+                        )
+                    }
+                    item {
+                        VideoQualityOption(
+                            quality = "240p",
+                            isSelected = selectedQuality == "240p",
+                            onSelect = { selectedQuality = "240p" }
+                        )
+                    }
+                    item {
+                        VideoQualityOption(
+                            quality = "360p",
+                            isSelected = selectedQuality == "360p",
+                            onSelect = { selectedQuality = "360p" }
+                        )
+                    }
+                    item {
+                        VideoQualityOption(
+                            quality = "480p",
+                            isSelected = selectedQuality == "480p",
+                            onSelect = { selectedQuality = "480p" }
+                        )
+                    }
+                    item {
+                        VideoQualityOption(
+                            quality = "720p HD",
+                            isSelected = selectedQuality == "720p HD",
+                            onSelect = { selectedQuality = "720p HD" }
+                        )
+                    }
+                    item {
+                        VideoQualityOption(
+                            quality = "1080p HD",
+                            isSelected = selectedQuality == "1080p HD",
+                            onSelect = { selectedQuality = "1080p HD" }
+                        )
+                    }
+                }
+            }
+        }
     }
+}
 
+@Composable
+fun VideoQualityOption(quality: String, isSelected: Boolean, onSelect: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
+            .clickable { onSelect() },
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        RadioButton(
+            selected = isSelected,
+            onClick = { onSelect() },
+            colors = RadioButtonDefaults.colors(selectedColor = Color.Red)
+        )
+        Text(
+            text = quality,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }
