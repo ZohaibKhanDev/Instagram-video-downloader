@@ -1,6 +1,14 @@
 package com.example.instagram_video_downloader.presentation.ui.screens.home
 
 import android.annotation.SuppressLint
+import android.app.DownloadManager
+import android.content.ContentResolver
+import android.content.ContentValues
+import android.content.Context
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -21,7 +29,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -44,7 +51,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -54,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -70,8 +77,8 @@ import com.example.instagram_video_downloader.R
 import com.example.instagram_video_downloader.domain.model.InstagramDownloader
 import com.example.instagram_video_downloader.domain.usecase.ResultState
 import com.example.instagram_video_downloader.presentation.viewmodel.MainViewModel
-import kotlinx.coroutines.delay
 import org.koin.compose.koinInject
+import java.io.OutputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -168,7 +175,7 @@ fun HomeScreen() {
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()
-                        .height(if (downloaderData?.videoThumbnail == null) 400.dp else 600.dp)
+                        .height(if (downloaderData?.videoThumbnail == null) 400.dp else 500.dp)
                         .border(
                             BorderStroke(1.dp, color = Color.LightGray),
                             shape = RoundedCornerShape(5.dp)
@@ -258,6 +265,7 @@ fun HomeScreen() {
                                 contentDescription = "",
                                 imageLoader = ImageLoader(context = context),
                                 modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
                                     .fillMaxWidth()
                                     .padding(start = 14.dp, end = 14.dp)
                                     .height(220.dp),
@@ -287,10 +295,10 @@ fun HomeScreen() {
 
         if (showBottomSheet) {
             ModalBottomSheet(
-                onDismissRequest = { },
+                onDismissRequest = { showBottomSheet = false },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(550.dp)
+                    .height(450.dp)
             ) {
                 Text(
                     text = "Music",
@@ -373,7 +381,19 @@ fun HomeScreen() {
 
 
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = {
+                        downloaderData?.let {
+                            val downloadUrl = it.downloadUrl
+                            val fileName = it.videoTitle
+                            val mimeType =
+                                if (selectedQuality == "128k") "audio/mpeg" else "video/mp4"
+
+                            if (!downloadUrl.isNullOrEmpty()) {
+                                downloadFile(context, downloadUrl, fileName, mimeType)
+                            } else {
+                            }
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(12.dp)
@@ -381,18 +401,20 @@ fun HomeScreen() {
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0XFFfe0164),
                         contentColor = Color.White
-                    ), shape = RoundedCornerShape(6.dp)
+                    ),
+                    shape = RoundedCornerShape(6.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Downloading,
-                            contentDescription = "",
-                            tint = Color.White
+                            contentDescription = "Download"
                         )
-
-                        Text(text = "Download", color = Color.White, fontSize = 19.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = "Download", fontWeight = FontWeight.Bold)
                     }
                 }
+
+
             }
         }
     }
@@ -420,3 +442,17 @@ fun VideoQualityOption(quality: String, isSelected: Boolean, onSelect: () -> Uni
         )
     }
 }
+
+private fun downloadFile(context: Context, url: String, title: String?, mimeType: String) {
+    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+
+    val uri = Uri.parse(url)
+    val request = DownloadManager.Request(uri)
+        .setMimeType(mimeType)
+        .setTitle(title)
+        .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "$title.$mimeType")
+
+    downloadManager.enqueue(request)
+}
+
