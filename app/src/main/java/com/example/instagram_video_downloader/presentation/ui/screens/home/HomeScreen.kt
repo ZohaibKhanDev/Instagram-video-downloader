@@ -177,7 +177,7 @@ fun HomeScreen() {
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()
-                        .height(if (downloaderData?.videoThumbnail == null) 400.dp else 500.dp)
+                        .height(if (downloaderData?.videoThumbnail == null) 400.dp else 550.dp)
                         .border(
                             BorderStroke(1.dp, color = Color.LightGray),
                             shape = RoundedCornerShape(5.dp)
@@ -208,7 +208,7 @@ fun HomeScreen() {
                                 onValueChange = { url = it },
                                 modifier = Modifier.width(280.dp),
                                 placeholder = {
-                                    Text(text = "Paste Instagram link", color = Color.LightGray)
+                                    Text(text = "Paste Instagram link", color = Color.Black)
                                 },
                                 leadingIcon = {
                                     Icon(
@@ -216,7 +216,7 @@ fun HomeScreen() {
                                         contentDescription = ""
                                     )
                                 },
-                                textStyle = TextStyle(fontSize = 15.sp, color = Color.LightGray),
+                                textStyle = TextStyle(fontSize = 15.sp, color = Color.Black),
                                 colors = TextFieldDefaults.colors(
                                     focusedTextColor = Color.Black,
                                     unfocusedTextColor = Color.Black,
@@ -230,7 +230,7 @@ fun HomeScreen() {
                                 modifier = Modifier
                                     .width(73.dp)
                                     .clickable {
-                                        isLoading=true
+                                        isLoading = true
                                         viewModel.downloadInstagramVideo(url, "MzRlODBiNWFlZA==")
                                     }
                                     .height(53.dp)
@@ -260,19 +260,32 @@ fun HomeScreen() {
 
                         if (isLoading) {
                             CircularProgressIndicator(color = Color(0XFFfe0164))
+                        } else {
+                            if (downloaderData?.channelName != null) {
+
+                                Text(
+                                    text = "Channel Name:" + downloaderData?.channelName.toString(),
+                                    fontSize = 22.sp,
+                                    color = Color.Gray, fontWeight = FontWeight.SemiBold
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(9.dp))
+                            downloaderData?.let {
+                                AsyncImage(
+                                    model = it.videoThumbnail,
+                                    contentDescription = "",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(start = 14.dp, end = 14.dp)
+                                        .height(220.dp)
+                                        .clip(RoundedCornerShape(12.dp)),
+                                    contentScale = ContentScale.Crop
+                                )
+                            }
                         }
 
-                        downloaderData?.let {
-                            AsyncImage(
-                                model = it.videoThumbnail,
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(start = 14.dp, end = 14.dp)
-                                    .height(220.dp).clip(RoundedCornerShape(12.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-                        }
+
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
