@@ -24,8 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
@@ -41,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -228,8 +225,22 @@ fun HomeScreen() {
 
 
 
+                Spacer(modifier = Modifier.height(20.dp))
 
+                Text(
+                    text = "Best Instagram Video Downloader",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold, color = Color.Gray
+                )
 
+                Spacer(modifier = Modifier.height(13.dp))
+
+                Text(
+                    text = "Y2Mate is the fastest Instagram Downloader tool that allows you to easily convert and download videos and audios from youtube for free and in the best available quality. Y2Mate is the ultimate tool to download unlimited Instagram videos without any need for registration. You can quickly convert and download hundreds of videos and music files directly from Instagram.",
+                    color = Color.DarkGray,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(12.dp)
+                )
             }
 
         }
