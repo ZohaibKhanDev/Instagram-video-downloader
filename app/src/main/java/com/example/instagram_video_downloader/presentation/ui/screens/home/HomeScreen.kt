@@ -18,13 +18,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -42,11 +45,14 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.ImageLoader
+import coil.compose.AsyncImage
 import com.example.instagram_video_downloader.R
 import com.example.instagram_video_downloader.domain.model.InstagramDownloader
 import com.example.instagram_video_downloader.domain.usecase.ResultState
@@ -69,7 +75,7 @@ fun HomeScreen() {
         mutableStateOf("")
     }
     val state by viewModel.videoDownloadInfo.collectAsState()
-
+    val context = LocalContext.current
     when (state) {
         is ResultState.Error -> {
             isLoading = false
@@ -122,6 +128,22 @@ fun HomeScreen() {
                 Icon(imageVector = Icons.Default.Menu, contentDescription = "")
             }
         })
+    }, floatingActionButton = {
+        if (downloaderData?.videoThumbnail == null) {
+
+        } else {
+            FloatingActionButton(
+                onClick = { /*TODO*/ },
+                containerColor = Color(0XFFfe0164),
+                contentColor = Color.White
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Download,
+                    contentDescription = "",
+                    tint = Color.White
+                )
+            }
+        }
     }) {
 
         LazyColumn(
@@ -136,7 +158,7 @@ fun HomeScreen() {
                     modifier = Modifier
                         .padding(10.dp)
                         .fillMaxWidth()
-                        .height(400.dp)
+                        .height(if (downloaderData?.videoThumbnail == null) 400.dp else 600.dp)
                         .border(
                             BorderStroke(1.dp, color = Color.LightGray),
                             shape = RoundedCornerShape(5.dp)
@@ -169,7 +191,7 @@ fun HomeScreen() {
                                 onValueChange = {
                                     url = it
                                 },
-
+                                modifier = Modifier.width(280.dp),
                                 placeholder = {
                                     Text(text = "Paste Instagram link", color = Color.LightGray)
                                 },
@@ -180,7 +202,7 @@ fun HomeScreen() {
                                 },
                                 textStyle = TextStyle(
                                     fontSize = 15.sp, color = Color.LightGray
-                                )
+                                ), singleLine = true
                             )
 
                             Spacer(modifier = Modifier.width(7.dp))
@@ -216,9 +238,26 @@ fun HomeScreen() {
                             text = "By using our service you are accepting our terms" +
                                     "of service",
                             color = Color.Gray,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(start = 10.dp, end = 10.dp)
                         )
 
+
+
+                        Spacer(modifier = Modifier.height(20.dp))
+
+                        downloaderData?.let {
+                            AsyncImage(
+                                model = it.videoThumbnail,
+                                contentDescription = "",
+                                imageLoader = ImageLoader(context = context),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 14.dp, end = 14.dp)
+                                    .height(220.dp),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
 
                     }
                 }
@@ -233,13 +272,14 @@ fun HomeScreen() {
                     fontWeight = FontWeight.Bold, color = Color.Gray
                 )
 
-                Spacer(modifier = Modifier.height(13.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
                     text = "Y2Mate is the fastest Instagram Downloader tool that allows you to easily convert and download videos and audios from youtube for free and in the best available quality. Y2Mate is the ultimate tool to download unlimited Instagram videos without any need for registration. You can quickly convert and download hundreds of videos and music files directly from Instagram.",
                     color = Color.DarkGray,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(12.dp)
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(start = 10.dp, end = 10.dp)
                 )
             }
 
